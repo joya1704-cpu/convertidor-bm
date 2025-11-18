@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Iniciar Sesión · VYM{% endblock %}
+
+{% block content %}
+<section class="login-section">
+  <div class="card-center">
+    <h2>Iniciar Sesión</h2>
+    <form action="{{ url_for('login') }}" method="post">
+      <input type="text" name="usuario" placeholder="Usuario" required>
+      <input type="password" name="contrasena" placeholder="Contraseña" required>
+      <button type="submit">Entrar</button>
+    </form>
+
+    <!-- Botón para abrir modal -->
+    <p class="registrar-texto">¿No tienes cuenta?  
+      <a href="#" id="abrirModal">Crear usuario</a>
+    </p>
+  </div>
+</section>
+
+<!-- 🪄 Modal de Registro -->
+<div id="modalRegistro" class="modal">
+  <div class="modal-content">
+    <span class="cerrar" id="cerrarModal">&times;</span>
+    <h2>Crear nueva cuenta</h2>
+    <form action="{{ url_for('registrar_usuario') }}" method="post">
+      <input type="text" name="nombre" placeholder="Nombre completo" required>
+      <input type="text" name="usuario" placeholder="Nombre de usuario" required>
+      <input type="email" name="correo" placeholder="Correo electrónico" required>
+      <input type="password" name="contrasena" placeholder="Contraseña" required>
+      <button type="submit">Registrar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // === Control del modal ===
+  const modal = document.getElementById("modalRegistro");
+  const abrir = document.getElementById("abrirModal");
+  const cerrar = document.getElementById("cerrarModal");
+
+  abrir.onclick = (e) => {
+    e.preventDefault();
+    modal.style.display = "flex";
+  };
+  cerrar.onclick = () => modal.style.display = "none";
+  window.onclick = (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  };
+</script>
+{% endblock %}
+
+

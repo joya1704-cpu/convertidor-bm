@@ -1,0 +1,563 @@
+/* =========================================================
+ 🎨 VARIABLES GLOBALES
+========================================================= */
+:root {
+  --green: #0b8a67;
+  --green-dark: #0a6e54;
+  --green-lite: #14a07a;
+  --white: #ffffff;
+  --bg: #f7faf9;
+  --text: #11332a;
+}
+
+/* =========================================================
+ 🧩 RESET Y BASE
+========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =========================================================
+ 🧭 NAVBAR
+========================================================= */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--green);
+  color: var(--white);
+}
+
+.navbar .brand {
+  font-weight: 700;
+}
+
+.navbar nav a {
+  color: var(--white);
+  text-decoration: none;
+  margin-left: 18px;
+  opacity: 0.95;
+}
+
+.navbar nav a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* =========================================================
+ 💫 HERO (Inicio)
+========================================================= */
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  text-align: center;
+  background: linear-gradient(150deg, var(--green) 0%, var(--green-lite) 100%);
+  color: var(--white);
+  padding: 60px 20px 80px;
+}
+
+.hero h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.hero p {
+  max-width: 750px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 26px;
+  border-radius: 25px;
+  background: var(--white);
+  color: var(--green-dark);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: #f2fdf9;
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+ ⚙️ CONVERTIDOR
+========================================================= */
+.titulo-principal {
+  text-align: center;
+  font-size: 2.2rem;
+  color: var(--green-dark);
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  animation: fadeIn 1s ease;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 50px;
+  min-height: 60vh;
+  padding: 20px 10px 30px;
+  flex-wrap: wrap;
+}
+
+.column {
+  background: #ffffff;
+  border: 2px solid #e6f5f0;
+  border-radius: 16px;
+  padding: 25px 35px;
+  width: 460px;
+  min-height: 210px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.column:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.column h2 {
+  color: var(--green-dark);
+  margin-bottom: 10px;
+}
+
+/* =========================================================
+ 📝 FORMULARIOS (General)
+========================================================= */
+form input[type="file"],
+form select,
+form button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d6e4df;
+  font-size: 0.95rem;
+}
+
+form button {
+  background: var(--green);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+form button:hover {
+  background: var(--green-dark);
+}
+
+/* =========================================================
+ 🖼️ GALERÍA
+========================================================= */
+.gallery {
+  margin-top: 15px;
+}
+
+.gallery img {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  margin: 6px;
+  object-fit: cover;
+  border: 2px solid #e2f3ee;
+}
+/* =========================================================
+ 🧠 LOGIN + MODAL DE REGISTRO
+========================================================= */
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 78vh;
+  background: var(--bg);
+}
+
+.card-center {
+  background: #fff;
+  width: 360px;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0efea;
+  text-align: center;
+}
+
+.card-center h2 {
+  color: var(--green-dark);
+  margin-bottom: 15px;
+}
+
+.card-center input {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d6e4df;
+  font-size: 0.95rem;
+}
+
+.card-center button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.card-center button:hover {
+  background: var(--green-dark);
+}
+
+.registrar-texto {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #2f5a4d;
+}
+
+.registrar-texto a {
+  color: var(--green-dark);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.registrar-texto a:hover {
+  text-decoration: underline;
+}
+
+/* --- Modal --- */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 50;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(17, 51, 42, 0.55);
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.4s ease;
+}
+
+/* --- Contenido del modal --- */
+.modal-content {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 16px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 2px solid #e6f5f0;
+  position: relative;
+  animation: scaleIn 0.3s ease;
+}
+
+.modal-content h2 {
+  color: var(--green-dark);
+  margin-bottom: 15px;
+}
+
+.modal-content input {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d6e4df;
+}
+
+.modal-content button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: var(--green);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.modal-content button:hover {
+  background: var(--green-dark);
+}
+
+/* --- Botón cerrar (X) --- */
+.cerrar {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 1.6rem;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.cerrar:hover {
+  color: var(--green-dark);
+}
+
+/* --- Animaciones --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+/* =========================================================
+ 💳 PLANES DE SUSCRIPCIÓN (DISEÑO UNIFICADO Y ELEGANTE)
+========================================================= */
+.suscripcion {
+  text-align: center;
+  padding: 20px 20px 60px; /* espacio ajustado entre navbar y footer */
+  background: #f8fcfa;
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* --- Título principal --- */
+.suscripcion h2 {
+  font-size: 2.2rem;
+  color: var(--green-dark);
+  font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  animation: fadeIn 1s ease;
+  text-align: center;
+}
+
+/* --- Descripción debajo del título --- */
+.suscripcion-desc {
+  color: #2f5a4d;
+  margin-bottom: 40px;
+  font-size: 1.05rem;
+}
+
+/* --- Contenedor de las tarjetas --- */
+.suscripcion-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+/* --- Tarjetas de plan (BASE UNIFICADA) --- */
+.plan-card,
+.plan-card.premium {
+  background: #ffffff;
+  border: 2px solid #e6f5f0;
+  border-radius: 18px;
+  width: 300px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.05);
+  transition: all 0.35s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* --- Efecto al pasar el cursor --- */
+.plan-card:hover,
+.plan-card.premium:hover {
+  background: linear-gradient(160deg, #ffffff 0%, #e9fff6 100%);
+  border-color: var(--green);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-5px);
+}
+
+/* --- Título de cada plan --- */
+.plan-card h3 {
+  font-size: 1.5rem;
+  color: var(--green-dark);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+/* --- Precio --- */
+.plan-card .precio {
+  font-size: 2rem;
+  color: var(--green);
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.plan-card .precio span {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* --- Lista de características --- */
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 20px;
+  color: #333;
+  text-align: left;
+  line-height: 1.6;
+}
+
+/* --- Íconos y colores de lista --- */
+.plan-card ul li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.plan-card ul li::before {
+  content: "✔";
+  color: #7d4af9; /* violeta suave */
+  font-weight: bold;
+}
+
+.plan-card ul li.negativo::before {
+  content: "✖";
+  color: #d93025;
+}
+
+/* --- Botón de suscripción --- */
+.plan-card button,
+.plan-card.premium button {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: 12px;
+  font-weight: bold;
+  border: 2px solid #333;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-card:hover button,
+.plan-card.premium:hover button {
+  border-color: var(--green-dark);
+  background: var(--green);
+  color: #fff;
+}
+
+/* --- Pequeña animación de entrada --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsividad --- */
+@media (max-width: 950px) {
+  .suscripcion {
+    padding: 20px 10px 70px;
+  }
+
+  .suscripcion-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .plan-card {
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .suscripcion h2 {
+    font-size: 1.9rem;
+  }
+}
+
+/* =========================================================
+ 🦶 FOOTER AJUSTE
+========================================================= */
+.footer {
+  text-align: center;
+  padding: 20px;
+  background: #eef7f4;
+  color: #2f5a4d;
+  border-top: 2px solid #d4eee0;
+  margin-top: auto;
+}
+
+
+/* =========================================================
+ ⚡ EFECTOS Y ANIMACIONES
+========================================================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+ 📱 RESPONSIVE
+========================================================= */
+@media (max-width: 950px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+
+  .column {
+    width: 90%;
+    max-width: 500px;
+  }
+
+  .titulo-principal,
+  .suscripcion h2 {
+    margin-top: 20px;
+    margin-bottom: 15px;
+  }
+}
+

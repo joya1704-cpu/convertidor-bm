@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Planes de Suscripción · VYM{% endblock %}
+
+{% block content %}
+
+<!-- CARGA EL SDK DE PAYPAL UNA VEZ -->
+<script src="https://www.paypal.com/sdk/js?client-id=AcNPU-Pvmt2C7pjnTj38a3JP67D6zW76Do_gz4T_E9MOsgJYuFyoa_21_dsrYxUtlEWS0Rh9-bPPHmZf&vault=true&intent=subscription"></script>
+
+<section class="suscripcion">
+  <h2>Planes de Suscripción</h2>
+  <p class="suscripcion-desc">
+    Apoya el desarrollo del proyecto con una pequeña contribución mensual 💚<br>
+    Elige el plan que mejor se adapte a ti.
+  </p>
+
+  <div class="suscripcion-cards">
+
+    <!-- PLAN GRATIS -->
+    <div class="plan-card">
+      <h3>Gratis</h3>
+      <p class="precio">0 <span>USD/mes</span></p>
+      <ul>
+        <li>Acceso limitado</li>
+        <li>Conversión básica</li>
+        <li class="negativo">Sin funciones premium</li>
+      </ul>
+      <a href="/suscripcion/gratis">
+        <button>Usar Gratis</button>
+      </a>
+    </div>
+
+    <!-- PLAN CON DESPLEGABLE PARA BASICO / PREMIUM -->
+    <div class="plan-card">
+      <h3>Suscripción Pagada</h3>
+      <label for="plan-selector">Elige tu plan:</label>
+      <select id="plan-selector">
+        <option value="P-2K6973181R3291153NENZEIA">Básico - $0.01/mes</option>
+        <option value="P-2B842033E5190021MNENZOVQ">Premium - $0.02/mes</option>
+      </select>
+
+      <ul id="plan-benefits">
+        <li>Acceso a funciones estándar</li>
+        <li>Soporte básico por correo</li>
+        <li class="negativo">Conversión simultánea limitada</li>
+      </ul>
+
+      <div id="paypal-button-container"></div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  const planSelector = document.getElementById("plan-selector");
+  const planBenefits = document.getElementById("plan-benefits");
+
+  // Función para actualizar beneficios según plan
+  function actualizarBeneficios() {
+    const plan = planSelector.value;
+    if(plan === "P-2K6973181R3291153NENZEIA") {
+      planBenefits.innerHTML = `
+        <li>Acceso a funciones estándar</li>
+        <li>Soporte básico por correo</li>
+        <li class="negativo">Conversión simultánea limitada</li>
+      `;
+    } else if(plan === "P-2B842033E5190021MNENZOVQ") {
+      planBenefits.innerHTML = `
+        <li>Conversión ilimitada</li>
+        <li>Sin anuncios ni restricciones</li>
+        <li>Soporte prioritario</li>
+      `;
+    }
+  }
+
+  planSelector.addEventListener("change", actualizarBeneficios);
+
+  // Inicializar botón PayPal
+  let currentPlan = planSelector.value;
+
+  function renderPayPalButton(planId) {
+    document.getElementById("paypal-button-container").innerHTML = "";
+    paypal.Buttons({
+      style: { shape: 'pill', color: 'white', layout: 'horizontal', label: 'subscribe' },
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({ plan_id: planId });
+      },
+      onApprove: function(data) {
+        alert("¡Suscripción creada! ID: " + data.subscriptionID);
+        // Aquí puedes redirigir: window.location.href = "/suscripcion/basico_o_premium";
+      }
+    }).render('#paypal-button-container');
+  }
+
+  // Renderizar botón inicial
+  renderPayPalButton(currentPlan);
+
+  // Cambiar botón al seleccionar otro plan
+  planSelector.addEventListener("change", function() {
+    currentPlan = this.value;
+    renderPayPalButton(currentPlan);
+  });
+
+});
+</script>
+
+{% endblock %}

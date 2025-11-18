@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Inicio · VYM{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Bienvenido a tu Convertidor Inteligente</h1>
+  <p>
+    Convierte tus archivos DOCX, PDF e Imágenes de forma rápida, segura y eficiente.<br>
+    Este proyecto forma parte del desarrollo de <strong>Vivian, Yenifer y Walter</strong>.
+  </p>
+  <a href="{{ url_for('convertidor') }}" class="btn">Ir al Convertidor</a>
+</section>
+{% endblock %}
+

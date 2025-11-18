@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Convertidor Universal VYM{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">Convertidor Universal VYM</div>
+    <nav>
+      <a href="{{ url_for('index') }}">Inicio</a>
+      <a href="{{ url_for('convertidor') }}">Convertidor</a>
+      <a href="{{ url_for('suscripcion') }}">Suscripción</a>
+      {% if session.get('usuario') %}
+        <a href="{{ url_for('logout') }}">Salir ({{ session['usuario'] }})</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    © 2025 <strong>Convertidor Universal VYM</strong> | Hecho con 💚 por Vivian, Yenifer y Walter
+  </footer>
+</body>
+</html>
+
+
+

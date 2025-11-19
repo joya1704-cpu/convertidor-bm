@@ -17,23 +17,20 @@ USERS_FILE = os.path.join(BASE_DIR, "usuarios.txt")
 for folder in [UPLOAD_FOLDER, PDF_FOLDER, GALLERY_FOLDER]:
     os.makedirs(folder, exist_ok=True)
 
-# =========================================================
-# CLASE USER (igual que el proyecto grande pero sin BD)
-# =========================================================
-class User:
-    def __init__(self, usuario, correo, contrasena, plan="Básico"):
-        self.usuario = usuario
-        self.correo = correo
-        self.contrasena = contrasena
-        self.plan = plan
-
-    def check_password(self, password):
-        return self.contrasena == password
-
-# Crear admin si no existe
+# Crear usuario admin por defecto
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         f.write("admin,admin@vym.com,1234\n")
+
+# =========================================================
+# CLASE USER (sin base de datos, solo archivo)
+# =========================================================
+class User:
+    def __init__(self, usuario, correo, contrasena):
+        self.usuario = usuario
+        self.correo = correo
+        self.contrasena = contrasena
+
 
 # =========================================================
 # FUNCIONES AUXILIARES
@@ -45,11 +42,13 @@ def leer_usuarios():
             for linea in f:
                 partes = linea.strip().split(",")
                 if len(partes) == 3:
-                    usuarios.append({
-                        "usuario": partes[0],
-                        "correo": partes[1],
-                        "contrasena": partes[2]
-                    })
+                    usuarios.append(
+                        User(
+                            usuario=partes[0],
+                            correo=partes[1],
+                            contrasena=partes[2]
+                        )
+                    )
     return usuarios
 
 
@@ -61,6 +60,7 @@ def guardar_usuario(usuario, correo, contrasena):
 @app.context_processor
 def inject_user():
     return {"session": session}
+
 
 # =========================================================
 # RUTAS PRINCIPALES
@@ -79,6 +79,11 @@ def convertidor():
 @app.route("/suscripcion")
 def suscripcion():
     return render_template("suscripcion.html")
+
+
+@app.route("/quienes-somos")
+def quienes_somos():
+    return render_template("quienes.html")
 
 
 # ======= NUEVAS RUTAS PAYPAL =======
@@ -111,9 +116,8 @@ def login():
         usuarios = leer_usuarios()
 
         for u in usuarios:
-            user = User(u["usuario"], u["correo"], u["contrasena"])
-            if user.usuario == usuario and user.check_password(contrasena):
-                session["usuario"] = user.usuario
+            if u.usuario == usuario and u.contrasena == contrasena:
+                session["usuario"] = usuario
                 flash("Inicio de sesión exitoso 💚", "success")
                 return redirect(url_for("index"))
 
@@ -132,7 +136,7 @@ def registrar_usuario():
     usuarios = leer_usuarios()
 
     for u in usuarios:
-        if u["usuario"] == usuario or u["correo"] == correo:
+        if u.usuario == usuario or u.correo == correo:
             flash("El usuario o correo ya existe ❌", "error")
             return redirect(url_for("login"))
 
@@ -146,6 +150,7 @@ def logout():
     session.pop("usuario", None)
     flash("Sesión cerrada 👋", "info")
     return redirect(url_for("login"))
+
 
 # =========================================================
 # CONVERTIDORES
@@ -182,6 +187,7 @@ def convert_image():
     img.save(output_path, output_format.upper())
 
     return send_file(output_path, as_attachment=True)
+
 
 # =========================================================
 # EJECUCIÓN LOCAL

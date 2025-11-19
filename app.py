@@ -73,6 +73,7 @@ def inject_user():
 def index():
     return render_template("index.html")
 
+# ======== RUTA CONVERTIDOR CORREGIDA ========
 @app.route("/convertidor")
 def convertidor():
     user = get_current_user()
@@ -80,8 +81,21 @@ def convertidor():
         flash("Debes iniciar sesión para usar el convertidor 🔒", "warning")
         return redirect(url_for("login"))
 
-    images = [f for f in os.listdir(GALLERY_FOLDER) if not f.startswith(".")]
-    return render_template("convertidor.html", images=images)
+    # Últimos 10 PDFs convertidos
+    pdfs = sorted(
+        [f for f in os.listdir(PDF_FOLDER) if f.lower().endswith(".pdf")],
+        key=lambda x: os.path.getmtime(os.path.join(PDF_FOLDER, x)),
+        reverse=True
+    )[:10]
+
+    # Últimas 10 imágenes convertidas
+    images = sorted(
+        [f for f in os.listdir(GALLERY_FOLDER) if not f.startswith(".")],
+        key=lambda x: os.path.getmtime(os.path.join(GALLERY_FOLDER, x)),
+        reverse=True
+    )[:10]
+
+    return render_template("convertidor.html", pdfs=pdfs, images=images)
 
 @app.route("/suscripcion")
 def suscripcion():
@@ -98,8 +112,17 @@ def perfil():
         flash("Primero inicia sesión para ver tu perfil 🔒", "warning")
         return redirect(url_for("login"))
 
-    docs = []  # Sin base de datos, no hay PDFs guardados
-    imgs = [f for f in os.listdir(GALLERY_FOLDER) if not f.startswith(".")]
+    docs = sorted(
+        [f for f in os.listdir(PDF_FOLDER) if f.lower().endswith(".pdf")],
+        key=lambda x: os.path.getmtime(os.path.join(PDF_FOLDER, x)),
+        reverse=True
+    )[:10]
+
+    imgs = sorted(
+        [f for f in os.listdir(GALLERY_FOLDER) if not f.startswith(".")],
+        key=lambda x: os.path.getmtime(os.path.join(GALLERY_FOLDER, x)),
+        reverse=True
+    )[:10]
 
     return render_template(
         "perfil.html",
@@ -167,10 +190,13 @@ def convert_docx():
     upload_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(upload_path)
 
-    output = os.path.join(PDF_FOLDER, file.filename.replace(".docx", ".pdf"))
+    output_path = os.path.join(PDF_FOLDER, file.filename.replace(".docx", ".pdf"))
     os.system(f"libreoffice --headless --convert-to pdf '{upload_path}' --outdir '{PDF_FOLDER}'")
 
-    return send_file(output, as_attachment=True)
+    if not os.path.exists(output_path):
+        return "Error al convertir DOCX a PDF ❌", 500
+
+    return send_file(output_path, as_attachment=True)
 
 @app.route("/convert_image", methods=["POST"])
 def convert_image():
@@ -178,12 +204,15 @@ def convert_image():
         return "No se envió imagen", 400
 
     image_file = request.files["image"]
-    output_format = request.form["format"]
+    output_format = request.form.get("format", "PNG").lower()
 
-    img = Image.open(image_file)
-    nombre_salida = image_file.filename.rsplit(".", 1)[0] + f".{output_format}"
-    output_path = os.path.join(GALLERY_FOLDER, nombre_salida)
-    img.save(output_path, output_format.upper())
+    try:
+        img = Image.open(image_file)
+        nombre_salida = image_file.filename.rsplit(".", 1)[0] + f".{output_format}"
+        output_path = os.path.join(GALLERY_FOLDER, nombre_salida)
+        img.save(output_path, output_format.upper())
+    except Exception as e:
+        return f"Error al convertir imagen: {str(e)}", 500
 
     return send_file(output_path, as_attachment=True)
 

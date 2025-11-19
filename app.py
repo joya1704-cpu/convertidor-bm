@@ -216,6 +216,37 @@ def convert_image():
 
     return send_file(output_path, as_attachment=True)
 
+@app.route("/dashboard")
+def dashboard():
+    if "usuario" not in session:
+        flash("Debes iniciar sesión para ver el dashboard ❗", "error")
+        return redirect(url_for("login"))
+
+    # Datos de ejemplo (luego los puedes generar dinámicos)
+    stats = {
+        "total_convertidos": 128,
+        "imagenes_convertidas": 89,
+        "documentos_convertidos": 39,
+        "usuarios_registrados": 14
+    }
+
+    # Datos para gráficas
+    grafica_mes = {
+        "labels": ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
+        "valores": [10, 15, 20, 25, 18, 30]
+    }
+
+    grafica_planes = {
+        "labels": ["Gratis", "Básico", "Premium"],
+        "valores": [10, 3, 1]
+    }
+
+    return render_template("dashboard.html",
+                           stats=stats,
+                           grafica_mes=grafica_mes,
+                           grafica_planes=grafica_planes)
+
+
 # =========================
 # EJECUCIÓN LOCAL
 # =========================

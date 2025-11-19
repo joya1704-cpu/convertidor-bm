@@ -1,11 +1,8 @@
-from flask import Flask, render_template, request, send_file, session, redirect, url_for, flash, Response, abort
+from flask import Flask, render_template, request, send_file, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from PIL import Image
-from io import BytesIO
-import tempfile
-import mimetypes
 import os
 
 # =========================================================
@@ -16,7 +13,11 @@ app.secret_key = "convertidor_vym_2025"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+PDF_FOLDER = os.path.join(BASE_DIR, "pdfs")
+GALLERY_FOLDER = os.path.join(BASE_DIR, "static", "gallery")
+
+for folder in [UPLOAD_FOLDER, PDF_FOLDER, GALLERY_FOLDER]:
+    os.makedirs(folder, exist_ok=True)
 
 # =========================================================
 # BASE DE DATOS (SQLite)
@@ -32,40 +33,26 @@ db = SQLAlchemy(app)
 # =========================================================
 class User(db.Model):
     __tablename__ = "users"
-    id            = db.Column(db.Integer, primary_key=True)
-    username      = db.Column(db.String(50), unique=True, nullable=False)
-    email         = db.Column(db.String(120), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    plan          = db.Column(db.String(20), nullable=False, default="Básico")
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
-
-    conversions = db.relationship("Conversion", backref="user", lazy=True, cascade="all,delete")
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    plan = db.Column(db.String(20), nullable=False, default="Básico")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Conversion(db.Model):
     __tablename__ = "conversions"
-    id            = db.Column(db.Integer, primary_key=True)
-    user_id       = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    tipo          = db.Column(db.String(20), nullable=False)  # docx_pdf | image
-    input_filename  = db.Column(db.String(255), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    tipo = db.Column(db.String(20), nullable=False)  # docx_pdf | image
+    input_filename = db.Column(db.String(255), nullable=False)
     output_filename = db.Column(db.String(255), nullable=False)
-    output_format   = db.Column(db.String(10), nullable=False)
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
-    input_data    = db.Column(db.LargeBinary, nullable=False)
-    output_data   = db.Column(db.LargeBinary, nullable=False)
-    output_mime   = db.Column(db.String(100), nullable=False)
-
-
-class Subscription(db.Model):
-    __tablename__ = "subscriptions"
-    id        = db.Column(db.Integer, primary_key=True)
-    user_id   = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
-    plan      = db.Column(db.String(20), nullable=False)
-    started_at= db.Column(db.DateTime, default=datetime.utcnow)
-    ended_at  = db.Column(db.DateTime)
+    output_format = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    input_data = db.Column(db.LargeBinary, nullable=False)
+    output_data = db.Column(db.LargeBinary, nullable=False)
+    output_mime = db.Column(db.String(100), nullable=False)
 
 # =========================================================
 # HELPERS
@@ -73,17 +60,6 @@ class Subscription(db.Model):
 def get_current_user():
     uid = session.get("user_id")
     return User.query.get(uid) if uid else None
-
-def guess_mime(name):
-    return mimetypes.guess_type(name)[0] or "application/octet-stream"
-
-def count_today_conversions(user_id, tipo):
-    hoy = datetime.utcnow().date()
-    return Conversion.query.filter(
-        Conversion.user_id == user_id,
-        Conversion.tipo == tipo,
-        db.func.date(Conversion.created_at) == hoy
-    ).count()
 
 @app.context_processor
 def inject_user():
@@ -95,6 +71,7 @@ def inject_user():
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/convertidor")
 def convertidor():
@@ -109,13 +86,16 @@ def convertidor():
 
     return render_template("convertidor.html", images=images)
 
-@app.route("/suscripcion")
-def suscripcion():
-    return render_template("suscripcion.html")
 
 @app.route("/quienes-somos")
 def quienes():
     return render_template("quienes.html")
+
+
+@app.route("/suscripcion")
+def suscripcion():
+    return render_template("suscripcion.html")
+
 
 # =========================================================
 # LOGIN / REGISTRO / LOGOUT
@@ -124,10 +104,10 @@ def quienes():
 def login():
     if request.method == "POST":
         usuario = request.form["usuario"].strip()
-        clave   = request.form["contrasena"]
+        clave = request.form["contrasena"]
 
         u = User.query.filter_by(username=usuario).first()
-        if u and u.check_password(clave):
+        if u and check_password_hash(u.password_hash, clave):
             session["user_id"] = u.id
             flash("Inicio de sesión exitoso 💚", "success")
             return redirect(url_for("index"))
@@ -136,31 +116,12 @@ def login():
 
     return render_template("login.html")
 
-@app.route("/perfil")
-def perfil():
-    user = get_current_user()
-    if not user:
-        flash("Primero inicia sesión para ver tu perfil 🔒", "warning")
-        return redirect(url_for("login"))
-
-    docs = Conversion.query.filter_by(user_id=user.id, tipo="docx_pdf") \
-                           .order_by(Conversion.created_at.desc()).all()
-    imgs = Conversion.query.filter_by(user_id=user.id, tipo="image") \
-                           .order_by(Conversion.created_at.desc()).all()
-
-    return render_template(
-        "perfil.html",
-        usuario=user,
-        plan=user.plan,
-        docs=docs,
-        imgs=imgs
-    )
 
 @app.route("/registrar_usuario", methods=["POST"])
 def registrar_usuario():
     username = request.form["usuario"]
-    email    = request.form["correo"]
-    contra   = request.form["contrasena"]
+    email = request.form["correo"]
+    contra = request.form["contrasena"]
 
     existe = User.query.filter((User.username == username) | (User.email == email)).first()
     if existe:
@@ -173,12 +134,12 @@ def registrar_usuario():
         password_hash=generate_password_hash(contra),
         plan="Básico"
     )
-
     db.session.add(u)
     db.session.commit()
 
     flash("Usuario creado con éxito 💚", "success")
     return redirect(url_for("login"))
+
 
 @app.route("/logout")
 def logout():
@@ -187,11 +148,80 @@ def logout():
     return redirect(url_for("login"))
 
 # =========================================================
+# CONVERTIDORES
+# =========================================================
+@app.route("/convert", methods=["POST"])
+def convert_docx():
+    if "file" not in request.files:
+        return "No se envió archivo", 400
+
+    file = request.files["file"]
+    if not file.filename.lower().endswith(".docx"):
+        return "Debe subir un archivo .docx", 400
+
+    upload_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(upload_path)
+
+    output = os.path.join(PDF_FOLDER, file.filename.replace(".docx", ".pdf"))
+    os.system(f"libreoffice --headless --convert-to pdf '{upload_path}' --outdir '{PDF_FOLDER}'")
+
+    # Guardar registro de conversión en BD
+    user = get_current_user()
+    if user:
+        with open(upload_path, "rb") as f_in, open(output, "rb") as f_out:
+            conv = Conversion(
+                user_id=user.id,
+                tipo="docx_pdf",
+                input_filename=file.filename,
+                output_filename=os.path.basename(output),
+                output_format="pdf",
+                input_data=f_in.read(),
+                output_data=f_out.read(),
+                output_mime="application/pdf"
+            )
+            db.session.add(conv)
+            db.session.commit()
+
+    return send_file(output, as_attachment=True)
+
+
+@app.route("/convert_image", methods=["POST"])
+def convert_image():
+    if "image" not in request.files:
+        return "No se envió imagen", 400
+
+    image_file = request.files["image"]
+    output_format = request.form["format"]
+
+    img = Image.open(image_file)
+    nombre_salida = image_file.filename.rsplit(".", 1)[0] + f".{output_format}"
+    output_path = os.path.join(GALLERY_FOLDER, nombre_salida)
+    img.save(output_path, output_format.upper())
+
+    # Guardar registro de conversión en BD
+    user = get_current_user()
+    if user:
+        with open(image_file.filename, "rb") as f_in, open(output_path, "rb") as f_out:
+            conv = Conversion(
+                user_id=user.id,
+                tipo="image",
+                input_filename=image_file.filename,
+                output_filename=nombre_salida,
+                output_format=output_format,
+                input_data=f_in.read(),
+                output_data=f_out.read(),
+                output_mime=f"image/{output_format.lower()}"
+            )
+            db.session.add(conv)
+            db.session.commit()
+
+    return send_file(output_path, as_attachment=True)
+
+# =========================================================
 # INICIALIZAR BD Y ADMIN
 # =========================================================
 with app.app_context():
     db.create_all()
-    # Usuario admin inicial para pruebas
     if not User.query.filter_by(username="admin").first():
         admin = User(
             username="admin",

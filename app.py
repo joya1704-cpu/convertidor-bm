@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, send_file, session, redirect, url_for, flash, Response, abort
+from flask import Flask, render_template, request, send_file, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from PIL import Image
 from io import BytesIO
-import tempfile
 import mimetypes
 import os
 
@@ -19,7 +18,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # =========================================================
-# BASE DE DATOS (SQLite)
+# CONFIGURACIÓN BASE DE DATOS (SQLite)
 # =========================================================
 db_path = os.path.join(BASE_DIR, "convertidor_vym.sqlite")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
@@ -47,13 +46,17 @@ class User(db.Model):
 
 class Conversion(db.Model):
     __tablename__ = "conversions"
+
     id            = db.Column(db.Integer, primary_key=True)
     user_id       = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     tipo          = db.Column(db.String(20), nullable=False)  # docx_pdf | image
+
     input_filename  = db.Column(db.String(255), nullable=False)
     output_filename = db.Column(db.String(255), nullable=False)
     output_format   = db.Column(db.String(10), nullable=False)
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Archivos guardados en BD
     input_data    = db.Column(db.LargeBinary, nullable=False)
     output_data   = db.Column(db.LargeBinary, nullable=False)
     output_mime   = db.Column(db.String(100), nullable=False)
@@ -61,11 +64,13 @@ class Conversion(db.Model):
 
 class Subscription(db.Model):
     __tablename__ = "subscriptions"
+
     id        = db.Column(db.Integer, primary_key=True)
     user_id   = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     plan      = db.Column(db.String(20), nullable=False)
     started_at= db.Column(db.DateTime, default=datetime.utcnow)
     ended_at  = db.Column(db.DateTime)
+
 
 # =========================================================
 # HELPERS
@@ -73,6 +78,7 @@ class Subscription(db.Model):
 def get_current_user():
     uid = session.get("user_id")
     return User.query.get(uid) if uid else None
+
 
 def guess_mime(name):
     return mimetypes.guess_type(name)[0] or "application/octet-stream"
@@ -85,9 +91,11 @@ def count_today_conversions(user_id, tipo):
         db.func.date(Conversion.created_at) == hoy
     ).count()
 
+
 @app.context_processor
 def inject_user():
     return {"current_user": get_current_user()}
+
 
 # =========================================================
 # RUTAS PRINCIPALES
@@ -96,6 +104,7 @@ def inject_user():
 def index():
     return render_template("index.html")
 
+
 @app.route("/convertidor")
 def convertidor():
     user = get_current_user()
@@ -103,11 +112,16 @@ def convertidor():
         flash("Debes iniciar sesión para usar el convertidor 🔒", "warning")
         return redirect(url_for("login"))
 
-    images = Conversion.query.filter_by(user_id=user.id, tipo="image") \
-                             .order_by(Conversion.created_at.desc()) \
-                             .limit(10).all()
+    try:
+        images = Conversion.query.filter_by(user_id=user.id, tipo="image") \
+                                 .order_by(Conversion.created_at.desc()) \
+                                 .limit(10).all()
+    except Exception as e:
+        print("Error en /convertidor:", e)
+        images = []
 
     return render_template("convertidor.html", images=images)
+
 
 @app.route("/suscripcion")
 def suscripcion():
@@ -116,6 +130,7 @@ def suscripcion():
 @app.route("/quienes-somos")
 def quienes():
     return render_template("quienes.html")
+
 
 # =========================================================
 # LOGIN / REGISTRO / LOGOUT
@@ -136,6 +151,7 @@ def login():
 
     return render_template("login.html")
 
+
 @app.route("/perfil")
 def perfil():
     user = get_current_user()
@@ -145,6 +161,7 @@ def perfil():
 
     docs = Conversion.query.filter_by(user_id=user.id, tipo="docx_pdf") \
                            .order_by(Conversion.created_at.desc()).all()
+
     imgs = Conversion.query.filter_by(user_id=user.id, tipo="image") \
                            .order_by(Conversion.created_at.desc()).all()
 
@@ -155,6 +172,7 @@ def perfil():
         docs=docs,
         imgs=imgs
     )
+
 
 @app.route("/registrar_usuario", methods=["POST"])
 def registrar_usuario():
@@ -180,30 +198,39 @@ def registrar_usuario():
     flash("Usuario creado con éxito 💚", "success")
     return redirect(url_for("login"))
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Sesión cerrada 👋", "info")
     return redirect(url_for("login"))
 
+
 # =========================================================
-# INICIALIZAR BD Y ADMIN
+# FUNCIONES PARA CREAR BD Y ADMIN
 # =========================================================
-with app.app_context():
-    db.create_all()
-    # Usuario admin inicial para pruebas
-    if not User.query.filter_by(username="admin").first():
-        admin = User(
-            username="admin",
-            email="admin@vym.com",
-            password_hash=generate_password_hash("1234"),
-            plan="Premium"
-        )
-        db.session.add(admin)
-        db.session.commit()
+def crear_bd_y_admin():
+    with app.app_context():
+        db.create_all()  # ⚡ Crea todas las tablas si no existen
+        # Crear usuario admin inicial
+        admin = User.query.filter_by(username="admin").first()
+        if not admin:
+            admin_user = User(
+                username="admin",
+                email="admin@convertidor.com",
+                password_hash=generate_password_hash("admin123"),
+                plan="Premium"
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Usuario admin creado: admin / admin123")
+        else:
+            print("Usuario admin ya existe")
+
 
 # =========================================================
 # RUN
 # =========================================================
 if __name__ == "__main__":
+    crear_bd_y_admin()
     app.run(debug=True)

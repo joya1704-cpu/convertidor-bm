@@ -6,17 +6,27 @@
 
 <section class="container">
 
-  <!--  WORD → PDF -->
+  <!-- WORD → PDF -->
   <div class="column">
     <h2>Convertidor Word a PDF</h2>
     <form action="{{ url_for('convert_docx') }}" method="post" enctype="multipart/form-data" class="form-box">
       <input type="file" name="file" required>
       <button type="submit">Convertir a PDF</button>
     </form>
+
+    {% if pdfs %}
+    <div class="gallery">
+      <h3>PDFs convertidos recientemente</h3>
+      <ul>
+        {% for pdf in pdfs %}
+          <li><a href="{{ url_for('static', filename='pdfs/' ~ pdf) }}" download>{{ pdf }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
   </div>
 
-
-  <!--  IMAGENES -->
+  <!-- IMÁGENES -->
   <div class="column">
     <h2>Convertidor de Imágenes</h2>
     <form action="{{ url_for('convert_image') }}" method="post" enctype="multipart/form-data" class="form-box">
@@ -34,14 +44,10 @@
     {% if images %}
     <div class="gallery">
       <h3>Imágenes convertidas recientemente</h3>
-
       <div class="gallery-grid">
         {% for img in images %}
-          <a href="{{ url_for('download', id=img.id) }}" title="Descargar {{ img.output_filename }}">
-            <img 
-              src="{{ url_for('image_raw', id=img.id) }}"
-              class="preview-img"
-              alt="{{ img.output_filename }}">
+          <a href="{{ url_for('static', filename='gallery/' ~ img) }}" download>
+            <img src="{{ url_for('static', filename='gallery/' ~ img) }}" class="preview-img" alt="{{ img }}">
           </a>
         {% endfor %}
       </div>
@@ -53,4 +59,3 @@
 </section>
 
 {% endblock %}
-

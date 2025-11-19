@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, send_file, session, redirect,
 from datetime import datetime
 from PIL import Image
 import os
-import subprocess
 
 # =========================
 # CONFIGURACIÓN PRINCIPAL
@@ -74,7 +73,7 @@ def inject_user():
 def index():
     return render_template("index.html")
 
-# ======== RUTA CONVERTIDOR ========
+# ======== RUTA CONVERTIDOR CORREGIDA ========
 @app.route("/convertidor")
 def convertidor():
     user = get_current_user()
@@ -192,14 +191,7 @@ def convert_docx():
     file.save(upload_path)
 
     output_path = os.path.join(PDF_FOLDER, file.filename.replace(".docx", ".pdf"))
-
-    try:
-        subprocess.run(
-            ["libreoffice", "--headless", "--convert-to", "pdf", upload_path, "--outdir", PDF_FOLDER],
-            check=True
-        )
-    except subprocess.CalledProcessError as e:
-        return f"Error al convertir DOCX a PDF ❌: {str(e)}", 500
+    os.system(f"libreoffice --headless --convert-to pdf '{upload_path}' --outdir '{PDF_FOLDER}'")
 
     if not os.path.exists(output_path):
         return "Error al convertir DOCX a PDF ❌", 500

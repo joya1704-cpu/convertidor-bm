@@ -19,7 +19,7 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # =========================================================
-# BASE DE DATOS (AHORA SQLite)
+# BASE DE DATOS (SQLite)
 # =========================================================
 db_path = os.path.join(BASE_DIR, "convertidor_vym.sqlite")
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
@@ -27,9 +27,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-
 # =========================================================
-# MODELOS ACTUALIZADOS (BINARIOS EN BD)
+# MODELOS
 # =========================================================
 class User(db.Model):
     __tablename__ = "users"
@@ -42,24 +41,19 @@ class User(db.Model):
 
     conversions = db.relationship("Conversion", backref="user", lazy=True, cascade="all,delete")
 
-    # 🔥 AÑADIR ESTO:
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
 
 class Conversion(db.Model):
     __tablename__ = "conversions"
-
     id            = db.Column(db.Integer, primary_key=True)
     user_id       = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     tipo          = db.Column(db.String(20), nullable=False)  # docx_pdf | image
-
     input_filename  = db.Column(db.String(255), nullable=False)
     output_filename = db.Column(db.String(255), nullable=False)
     output_format   = db.Column(db.String(10), nullable=False)
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # === NUEVO: archivos guardados en BD ===
     input_data    = db.Column(db.LargeBinary, nullable=False)
     output_data   = db.Column(db.LargeBinary, nullable=False)
     output_mime   = db.Column(db.String(100), nullable=False)
@@ -67,13 +61,11 @@ class Conversion(db.Model):
 
 class Subscription(db.Model):
     __tablename__ = "subscriptions"
-
     id        = db.Column(db.Integer, primary_key=True)
     user_id   = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     plan      = db.Column(db.String(20), nullable=False)
     started_at= db.Column(db.DateTime, default=datetime.utcnow)
     ended_at  = db.Column(db.DateTime)
-
 
 # =========================================================
 # HELPERS
@@ -81,7 +73,6 @@ class Subscription(db.Model):
 def get_current_user():
     uid = session.get("user_id")
     return User.query.get(uid) if uid else None
-
 
 def guess_mime(name):
     return mimetypes.guess_type(name)[0] or "application/octet-stream"
@@ -94,11 +85,9 @@ def count_today_conversions(user_id, tipo):
         db.func.date(Conversion.created_at) == hoy
     ).count()
 
-
 @app.context_processor
 def inject_user():
     return {"current_user": get_current_user()}
-
 
 # =========================================================
 # RUTAS PRINCIPALES
@@ -106,7 +95,6 @@ def inject_user():
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 @app.route("/convertidor")
 def convertidor():
@@ -121,7 +109,6 @@ def convertidor():
 
     return render_template("convertidor.html", images=images)
 
-
 @app.route("/suscripcion")
 def suscripcion():
     return render_template("suscripcion.html")
@@ -129,7 +116,6 @@ def suscripcion():
 @app.route("/quienes-somos")
 def quienes():
     return render_template("quienes.html")
-
 
 # =========================================================
 # LOGIN / REGISTRO / LOGOUT
@@ -150,7 +136,6 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/perfil")
 def perfil():
     user = get_current_user()
@@ -160,7 +145,6 @@ def perfil():
 
     docs = Conversion.query.filter_by(user_id=user.id, tipo="docx_pdf") \
                            .order_by(Conversion.created_at.desc()).all()
-
     imgs = Conversion.query.filter_by(user_id=user.id, tipo="image") \
                            .order_by(Conversion.created_at.desc()).all()
 
@@ -171,7 +155,6 @@ def perfil():
         docs=docs,
         imgs=imgs
     )
-
 
 @app.route("/registrar_usuario", methods=["POST"])
 def registrar_usuario():
@@ -197,24 +180,30 @@ def registrar_usuario():
     flash("Usuario creado con éxito 💚", "success")
     return redirect(url_for("login"))
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Sesión cerrada 👋", "info")
     return redirect(url_for("login"))
 
-
 # =========================================================
-# RESTO DEL CÓDIGO DE CONVERSIONES Y DESCARGAS
+# INICIALIZAR BD Y ADMIN
 # =========================================================
-# ... tu código original de convert_docx, convert_image, image_raw, download
-# NO TOCO NADA más
+with app.app_context():
+    db.create_all()
+    # Usuario admin inicial para pruebas
+    if not User.query.filter_by(username="admin").first():
+        admin = User(
+            username="admin",
+            email="admin@vym.com",
+            password_hash=generate_password_hash("1234"),
+            plan="Premium"
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 # =========================================================
 # RUN
 # =========================================================
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()  # ⚡ Esto crea automáticamente la BD SQLite
     app.run(debug=True)

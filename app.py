@@ -1,13 +1,11 @@
 from flask import Flask, render_template, request, send_file, session, redirect, url_for, flash
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from PIL import Image
 import os
-import mimetypes
 
-# =========================================================
+# =========================
 # CONFIGURACIÓN PRINCIPAL
-# =========================================================
+# =========================
 app = Flask(__name__)
 app.secret_key = "convertidor_vym_2025"
 
@@ -25,9 +23,9 @@ if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         f.write("admin,admin@vym.com,1234,Básico\n")
 
-# =========================================================
-# CLASE USER (solo archivo)
-# =========================================================
+# =========================
+# CLASE USER
+# =========================
 class User:
     def __init__(self, username, email, contrasena, plan="Básico"):
         self.username = username
@@ -38,9 +36,9 @@ class User:
     def check_password(self, password):
         return self.contrasena == password
 
-# =========================================================
+# =========================
 # FUNCIONES AUXILIARES
-# =========================================================
+# =========================
 def leer_usuarios():
     usuarios = []
     if os.path.exists(USERS_FILE):
@@ -68,9 +66,9 @@ def get_current_user():
 def inject_user():
     return {"current_user": get_current_user()}
 
-# =========================================================
+# =========================
 # RUTAS PRINCIPALES
-# =========================================================
+# =========================
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -93,9 +91,27 @@ def suscripcion():
 def quienes():
     return render_template("quienes.html")
 
-# =========================================================
+@app.route("/perfil")
+def perfil():
+    user = get_current_user()
+    if not user:
+        flash("Primero inicia sesión para ver tu perfil 🔒", "warning")
+        return redirect(url_for("login"))
+
+    docs = []  # Sin base de datos, no hay PDFs guardados
+    imgs = [f for f in os.listdir(GALLERY_FOLDER) if not f.startswith(".")]
+
+    return render_template(
+        "perfil.html",
+        usuario=user,
+        plan=user.plan,
+        docs=docs,
+        imgs=imgs
+    )
+
+# =========================
 # LOGIN / REGISTRO / LOGOUT
-# =========================================================
+# =========================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -136,9 +152,9 @@ def logout():
     flash("Sesión cerrada 👋", "info")
     return redirect(url_for("login"))
 
-# =========================================================
+# =========================
 # CONVERTIDORES
-# =========================================================
+# =========================
 @app.route("/convert", methods=["POST"])
 def convert_docx():
     if "file" not in request.files:
@@ -171,8 +187,8 @@ def convert_image():
 
     return send_file(output_path, as_attachment=True)
 
-# =========================================================
+# =========================
 # EJECUCIÓN LOCAL
-# =========================================================
+# =========================
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

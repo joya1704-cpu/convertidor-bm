@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Convertidor Universal VYM{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>{% block title %}Convertidor Universal B&M{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
   <header class="navbar">
-    <div class="brand">Convertidor Universal VYM</div>
-    <nav>
-      <a href="{{ url_for('index') }}">Inicio</a>
-      <a href="{{ url_for('convertidor') }}">Convertidor</a>
-      <a href="{{ url_for('suscripcion') }}">Suscripción</a>
-      {% if session.get('usuario') %}
-        <a href="{{ url_for('logout') }}">Salir ({{ session['usuario'] }})</a>
-      {% else %}
-        <a href="{{ url_for('login') }}">Login</a>
-      {% endif %}
-    </nav>
+    <div class="brand">Convertidor Universal B&M</div>
+   <nav>
+  <a href="{{ url_for('index') }}">Inicio</a>
+  <a href="{{ url_for('convertidor') }}">Convertidor</a>
+  <a href="{{ url_for('suscripcion') }}">Suscripción</a>
+  <a href="{{ url_for('quienes') }}">¿Quiénes Somos?</a>
+
+  {% if current_user %}
+    <span class="user-dropdown">
+      <select onchange="if (this.value) window.location.href=this.value">
+        <option value="">{{ current_user.username }}</option>
+        <option value="{{ url_for('perfil') }}">Perfil</option>
+        <option value="{{ url_for('logout') }}">Cerrar sesión</option>
+      </select>
+    </span>
+  {% else %}
+    <a href="{{ url_for('login') }}">Login</a>
+  {% endif %}
+</nav>
+
+
   </header>
 
   <main>
@@ -26,10 +38,17 @@
   </main>
 
   <footer class="footer">
-    © 2025 <strong>Convertidor Universal VYM</strong> | Hecho con 💚 por Vivian, Yenifer y Walter
+    © 2025 <strong>Convertidor Universal B&M</strong> | Hecho con 💚 por Vivian, Yenifer y Walter
   </footer>
+  <script>
+    function handleUserOption(value) {
+      if (value === "perfil") {
+        window.location.href = "{{ url_for('perfil') }}";
+      } else if (value === "logout") {
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+  </script>
 </body>
+
 </html>
-
-
-

@@ -19,12 +19,13 @@
 </section>
 
 <!-- 🪄 Modal de Registro -->
+<!-- 🪄 Modal de Registro -->
 <div id="modalRegistro" class="modal">
   <div class="modal-content">
     <span class="cerrar" id="cerrarModal">&times;</span>
     <h2>Crear nueva cuenta</h2>
     <form action="{{ url_for('registrar_usuario') }}" method="post">
-      <input type="text" name="nombre" placeholder="Nombre completo" required>
+      <!-- Campo eliminado: nombre -->
       <input type="text" name="usuario" placeholder="Nombre de usuario" required>
       <input type="email" name="correo" placeholder="Correo electrónico" required>
       <input type="password" name="contrasena" placeholder="Contraseña" required>
@@ -32,6 +33,7 @@
     </form>
   </div>
 </div>
+
 
 <script>
   // === Control del modal ===

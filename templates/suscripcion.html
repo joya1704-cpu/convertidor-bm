@@ -84,7 +84,11 @@ document.addEventListener("DOMContentLoaded", function() {
     paypal.Buttons({
       style: { shape: 'pill', color: 'white', layout: 'horizontal', label: 'subscribe' },
       createSubscription: function(data, actions) {
-        return actions.subscription.create({ plan_id: planId });
+       return actions.subscription.create({
+    plan_id: planId,
+    custom_id: "{{ current_user.id }}"
+});
+
       },
       onApprove: function(data) {
         alert("¡Suscripción creada! ID: " + data.subscriptionID);

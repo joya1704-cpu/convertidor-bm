@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Perfil · VYM{% endblock %}
+{% block content %}
+
+<section class="perfil">
+    <div class="perfil-container">
+
+        <!-- 🧍 Información del usuario -->
+        <div class="perfil-info">
+            <div class="avatar">{{ usuario.username[0]|upper }}</div>
+            <h2>{{ usuario.username }}</h2>
+            <p>Correo: <strong>{{ usuario.email }}</strong></p>
+            <p>Plan actual: <span class="plan">{{ plan }}</span></p>
+
+            <a href="{{ url_for('suscripcion') }}" class="btn">Cambiar Plan</a>
+        </div>
+
+        <!-- 📄 Documentos Convertidos -->
+        <div class="perfil-docs">
+            <h3>Documentos Convertidos</h3>
+            {% if docs %}
+            <div class="converted-list">
+                {% for d in docs %}
+                <div class="converted-card">
+                    <div class="converted-info">
+
+                        <!-- Nombre del archivo y formato -->
+                        <p class="filename">
+                            <a href="{{ url_for('download', id=d.id) }}" download>
+                                {{ d.input_filename }} → {{ d.output_format|upper }}
+                            </a>
+                        </p>
+
+                        <!-- Fecha -->
+                        <p class="fecha">{{ d.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+
+                        <!-- Botón de descarga -->
+                        <a href="{{ url_for('download', id=d.id) }}" class="download-btn" download>
+                            Descargar documento
+                        </a>
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No hay documentos convertidos aún.</p>
+            {% endif %}
+        </div>
+
+        <!-- 🖼️ Imágenes Convertidas -->
+        <div class="perfil-imgs">
+            <h3>Imágenes Convertidas</h3>
+            {% if imgs %}
+            <div class="converted-list">
+
+                {% for img in imgs %}
+                <div class="converted-card">
+
+                    <!-- Miniatura desde la BD -->
+                    <div class="converted-preview">
+                        <img src="{{ url_for('image_raw', id=img.id) }}" 
+                             alt="{{ img.output_filename }}">
+                    </div>
+
+                    <div class="converted-info">
+
+                        <!-- Nombre del archivo -->
+                        <p class="filename">{{ img.output_filename }}</p>
+
+                        <!-- Fecha -->
+                        <p class="fecha">{{ img.created_at.strftime("%d/%m/%Y %H:%M") }}</p>
+
+                        <!-- Botón de descarga desde BD -->
+                        <a href="{{ url_for('download', id=img.id) }}" 
+                           class="download-btn" 
+                           download>
+                            Descargar imagen
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No has convertido imágenes aún.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

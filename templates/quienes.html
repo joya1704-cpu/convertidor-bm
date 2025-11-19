@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}¿Quiénes Somos? · VYM{% endblock %}
+
+{% block content %}
+
+<section class="about-section">
+
+  <!-- Título principal -->
+  <div class="about-header">
+    <h2 class="titulo-principal">¿Quiénes Somos?</h2>
+    <p class="about-subtitle">
+      Somos un pequeño equipo que creó <strong>Convertidor Universal B&M</strong> 
+      como un proyecto académico y práctico, pensado para simplificar la conversión de documentos e imágenes.
+    </p>
+  </div>
+
+  <!-- Historia del nombre B&M -->
+  <div class="about-box">
+    <h3>Nuestra historia: ¿por qué <span class="brand-bm">B&amp;M</span>?</h3>
+    <p>
+      El nombre <strong>B&amp;M</strong> nace de nuestras iniciales combinadas y del propósito del proyecto:
+      un <strong>convertidor</strong> que une nuestras ideas.
+    </p>
+    <p>
+      <strong>B</strong> representa a <strong>Vivian</strong>, 
+      <strong>&amp;</strong> representa a <strong>Yenifer</strong>, 
+      y <strong>M</strong> representa a <strong>Walter</strong>. 
+      Juntas, esas letras forman <strong>B&amp;M</strong>, un nombre corto y fácil de recordar, 
+      que simboliza trabajo en equipo, colaboración y la unión de nuestras habilidades para construir 
+      una herramienta útil.
+    </p>
+  </div>
+
+  <!-- Integrantes del equipo -->
+  <div class="about-team">
+    <h3>Nuestro equipo</h3>
+
+    <div class="team-grid">
+
+
+        <!-- Vivian -->
+      <article class="team-card">
+        <div class="avatar-circle">
+  <img src="{{ url_for('static', filename='img/vivian.jpg') }}" 
+       alt="Foto de Vivian Zelaya">
+</div>
+
+        <h4>Vivian Zelaya</h4>
+        <p class="team-role">Programadora</p>
+        <p class="team-desc">
+          Encargada del diseño visual, estructura del frontend, documentación del proyecto 
+          y estructura general del proyecto.
+        </p>
+      </article>
+
+      <!-- Yenifer -->
+      <article class="team-card">
+        <div class="avatar-circle">
+    <img src="{{ url_for('static', filename='img/yenifer.jpg') }}" 
+         alt="Foto de Yenifer Sánchez">
+  </div>
+        <h4>Yenifer Sánchez</h4>
+        <p class="team-role">Programadora</p>
+        <p class="team-desc">
+          Responsable del flujo de usuario, diseño de vistas, pruebas funcionales y mejoras 
+          en la experiencia de uso.
+        </p>
+      </article>
+
+       <!-- Walter -->
+      <article class="team-card">
+        <div class="avatar-circle">
+    <img src="{{ url_for('static', filename='img/walter.jpg') }}" 
+         alt="Foto de Walter Joya">
+  </div>
+        <h4>Walter Joya</h4>
+        <p class="team-role">Programador</p>
+        <p class="team-desc">
+          Encargado del desarrollo y lógica del convertidor, integración con la base de datos 
+          y coordinación general del equipo.
+        </p>
+      </article>
+
+    </div>
+  </div>
+
+</section>
+
+{% endblock %}

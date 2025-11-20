@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Planes de Suscripción · VYM{% endblock %}
+{% block title %}Planes de Suscripción · BIM{% endblock %}
 
 {% block content %}
 
@@ -91,9 +91,35 @@ document.addEventListener("DOMContentLoaded", function() {
 
       },
       onApprove: function(data) {
-        alert("¡Suscripción creada! ID: " + data.subscriptionID);
-        // Aquí puedes redirigir: window.location.href = "/suscripcion/basico_o_premium";
-      }
+  const subscriptionID = data.subscriptionID;
+  const planID = currentPlan; // valor del <select>
+
+  fetch("/suscripcion/confirmar", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      subscriptionID: subscriptionID,
+      planID: planID
+    })
+  })
+  .then(resp => resp.json())
+  .then(info => {
+    if (info.ok) {
+      alert("✅ Suscripción registrada correctamente. Plan activo: " + info.plan);
+      window.location.href = "{{ url_for('perfil') }}";
+    } else {
+      console.error("Error al registrar suscripción:", info);
+      alert("La suscripción se creó en PayPal, pero hubo un problema al guardarla en el sistema.");
+    }
+  })
+  .catch(err => {
+    console.error("Error al llamar /suscripcion/confirmar:", err);
+    alert("Ocurrió un error al registrar la suscripción en el sistema.");
+  });
+}
+
     }).render('#paypal-button-container');
   }
 
